@@ -5,7 +5,7 @@ class TimeSeriesTransformer(nn.Module):
     def __init__(self, input_size, d_model=64, nhead=4, num_layers=2):
         super().__init__()
         self.input_linear = nn.Linear(input_size, d_model)
-        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead)
+        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, batch_first=True)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
         self.output_linear = nn.Linear(d_model, 1)
 

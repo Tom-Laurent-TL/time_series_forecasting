@@ -36,6 +36,20 @@ def generate_complex_signal(num_points):
     signal = (amp1 * np.sin(freq1 * x + phase1) +
                 amp2 * np.sin(freq2 * x + phase2) +
                 amp3 * np.sin(freq3 * x + phase3))
+
+    # Multi-scale trends
+    # Slow linear trend
+    linear_trend = np.random.uniform(-0.01, 0.01) * x
+    # Quadratic trend
+    quadratic_trend = np.random.uniform(-0.0001, 0.0001) * (x ** 2)
+    # Very low-frequency sinusoidal trend
+    slow_freq = np.random.uniform(0.005, 0.02)
+    slow_phase = np.random.uniform(0, np.pi)
+    slow_amp = np.random.uniform(0.5, 1.5)
+    slow_trend = slow_amp * np.sin(slow_freq * x + slow_phase)
+
+    signal += linear_trend + quadratic_trend + slow_trend
+
     # Add Gaussian noise
     noise = np.random.normal(0, 0.1, num_points)
     signal += noise

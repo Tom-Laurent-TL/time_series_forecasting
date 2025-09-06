@@ -7,7 +7,7 @@ import numpy as np
 import pywt  # PyWavelets for wavelet transforms
 
 class RecursiveTimeSeriesTransformer(nn.Module):
-	def __init__(self, seq_length, forecast_steps, d_model=128, nhead=8, num_layers=3, dropout=0.1, time_feat_size=7, time_emb_dim=8):
+	def __init__(self, seq_length, forecast_steps, d_model=128, nhead=8, num_layers=6, dropout=0.1, time_feat_size=7, time_emb_dim=8):
 		super().__init__()
 		self.seq_length = seq_length
 		self.forecast_steps = forecast_steps
@@ -57,8 +57,14 @@ class RecursiveTimeSeriesTransformer(nn.Module):
 			# Concatenate all coefficients for compression
 			wt_seq = np.concatenate([c for c in coeffs])
 			wt.append(wt_seq)
-		wt = torch.tensor(wt, dtype=x.dtype, device=x.device)
+		wt = torch.tensor(np.array(wt), dtype=x.dtype, device=x.device)
 		return wt
+	
+	def log_return_transform(self, x):
+		# x: (batch_size, seq_length)
+		# Returns: (batch_size, seq_length-1)
+		log_x = torch.log(x)
+		return log_x[:, 1:] - log_x[:, :-1]
 
 	def attention_pooling(self, memory):
 		# memory: (batch_size, seq_length, d_model)
@@ -73,6 +79,9 @@ class RecursiveTimeSeriesTransformer(nn.Module):
 		device = x.device
 		seq_length = self.seq_length
 		d_model = self.d_model
+
+		# Apply wavelet transform to input sequence
+		# x = self.wavelet_transform(x)  # (batch_size, wt_seq_length)
 
 		current_seq = x.clone()  # (batch_size, seq_length)
 		preds = []
@@ -92,8 +101,6 @@ class RecursiveTimeSeriesTransformer(nn.Module):
 					time_emb = self.time_embedding(time_feat_idx.unsqueeze(0).expand(batch_size, seq_length))
 				inp_seq = torch.cat([inp_seq, time_emb], dim=-1)  # (batch_size, seq_length, d_model + time_emb_dim)
 				inp_seq = self.concat_proj(inp_seq)  # (batch_size, seq_length, d_model)
-
-			# Removed sinusoidal positional encoding addition
 
 			# TCN encoder for non-stationary data
 			tcn_inp = inp_seq.transpose(1, 2)  # (batch_size, d_model, seq_length)

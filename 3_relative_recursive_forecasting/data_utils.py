@@ -43,7 +43,7 @@ def generate_complex_signal(num_points):
 
 def generate_nonstationary_signal(num_points):
     """
-    Generate a non-stationary signal by varying frequency, amplitude, or trend over time.
+    Generate a non-stationary signal resembling a stock price (always above zero, with trend and noise).
     Returns:
         signal: np.ndarray, shape (num_points,)
     """
@@ -52,11 +52,15 @@ def generate_nonstationary_signal(num_points):
     freq = np.linspace(0.1, 1.0, num_points)
     amp = np.linspace(0.5, 2.0, num_points)
     phase = np.random.uniform(0, np.pi)
-    # Add a trend
-    trend = 0.01 * x
+    # Add a stronger upward trend
+    trend = 0.05 * x
     # Non-stationary sine wave
     signal = amp * np.sin(freq * x + phase) + trend
     # Add Gaussian noise
-    noise = np.random.normal(0, 0.1, num_points)
+    noise = np.random.normal(0, 0.2, num_points)
     signal += noise
+    # Shift signal to be above zero (like a stock price)
+    min_signal = np.min(signal)
+    if min_signal < 1.0:
+        signal += (1.0 - min_signal)
     return signal

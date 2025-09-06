@@ -36,20 +36,26 @@ def generate_complex_signal(num_points):
     signal = (amp1 * np.sin(freq1 * x + phase1) +
                 amp2 * np.sin(freq2 * x + phase2) +
                 amp3 * np.sin(freq3 * x + phase3))
+    # Add Gaussian noise
+    noise = np.random.normal(0, 0.1, num_points)
+    signal += noise
+    return signal
 
-    # Multi-scale trends
-    # Slow linear trend
-    linear_trend = np.random.uniform(-0.01, 0.01) * x
-    # Quadratic trend
-    quadratic_trend = np.random.uniform(-0.0001, 0.0001) * (x ** 2)
-    # Very low-frequency sinusoidal trend
-    slow_freq = np.random.uniform(0.005, 0.02)
-    slow_phase = np.random.uniform(0, np.pi)
-    slow_amp = np.random.uniform(0.5, 1.5)
-    slow_trend = slow_amp * np.sin(slow_freq * x + slow_phase)
-
-    signal += linear_trend + quadratic_trend + slow_trend
-
+def generate_nonstationary_signal(num_points):
+    """
+    Generate a non-stationary signal by varying frequency, amplitude, or trend over time.
+    Returns:
+        signal: np.ndarray, shape (num_points,)
+    """
+    x = np.arange(num_points)
+    # Linearly increasing frequency and amplitude
+    freq = np.linspace(0.1, 1.0, num_points)
+    amp = np.linspace(0.5, 2.0, num_points)
+    phase = np.random.uniform(0, np.pi)
+    # Add a trend
+    trend = 0.01 * x
+    # Non-stationary sine wave
+    signal = amp * np.sin(freq * x + phase) + trend
     # Add Gaussian noise
     noise = np.random.normal(0, 0.1, num_points)
     signal += noise
